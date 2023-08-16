@@ -1,0 +1,49 @@
+[
+    {
+        "id": 1,
+        "username": "RickSanchez",
+        "name": "Рик",
+        "lastname": "Санчес",
+        "email": "rik@bk.ru",
+        "role": "admin",
+        "password": "rik_admin",
+        "is_superuser": "True",
+        "is_staff": "True"
+    },
+    {
+        "id": 2,
+        "username": "BethSmith",
+        "name": "Бэт",
+        "lastname": "Смит",
+        "email": "bat@bk.ru",
+        "role": "user",
+        "password": "bat_user"
+    },
+    {
+        "id": 3,
+        "username": "MortySmith",
+        "name": "Морти",
+        "lastname": "Смит",
+        "email": "morty@bk.ru",
+        "role": "user",
+        "password": "morty_user"
+    },
+    {
+        "id": 4,
+        "username": "JerrySmith",
+        "name": "Джерри",
+        "lastname": "Смит",
+        "email": "jerry@bk.ru",
+        "role": "user",
+        "password": "jerry_user"
+    },
+    {
+        "id": 5,
+        "username": "SummerSmith",
+        "name": "Саммер",
+        "lastname": "Смит",
+        "email": "summer@bk.ru",
+        "role": "user",
+        "password": "summer_user"
+    }
+]

@@ -1,0 +1,302 @@
+openapi: 3.0.2
+info:
+  title: 'CoffeTest'
+  version: '1.0.0'
+  description: |
+    запросы к API начинаются с `/api/`
+    # Описание
+    Тестовое API
+    # Авторизация
+        Каждый запрос к API требует авторизации. Для авторизации необходим специальный уникальный `token`.
+        Токен авторизации необходимо передавать в заголовке `Authorization` каждого запроса.
+        Пример: `Authorization: Token token`
+        Вместо `token` вставьте ваш API токен.
+    # Обновление Token
+        Токен действует 24 часа с момента его получения. Для его обновления неодходимо сделать
+        запрос на `/token/refresh/` и получить новый токен.
+servers:
+  - url: /api/
+
+tags:
+  - name: Получение Token
+  - name: Пользователи
+  - name: Покупки
+
+paths:
+  /token/:
+    post:
+      tags:
+        - Получение Token
+      description: Получить JWT-токен
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                  writeOnly: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JWTToken'
+          description: successful operation
+        400:
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /token/refresh/:
+    post:
+      tags:
+        - Получение Token
+      description: Обновить JWT-токен
+      parameters: [ ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - refresh
+              properties:
+                refresh:
+                  type: string
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  refresh:
+                    type: string
+                required:
+                  - refresh
+          description: successful operation
+  /users/:
+    get:
+      tags:
+        - Пользователи
+      description: |
+        Получить список пользователей                                
+        
+        Права доступа: **Аутентифицированные пользователи.**
+      responses:
+        200:
+          description: Список пользователей с пагинацией
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: number
+                  next:
+                    type: string
+                  previous:
+                    type: string
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Users'
+        401:
+          description: Authentication credentials were not provided.
+  /users/{user_id}/:
+    get:
+      tags:
+        - Пользователи
+      description: |
+        Получить пользователя по ID.                                
+        
+        Права доступа: **Аутентифицированные пользователи.**
+      responses:
+        200:
+          description: Данные пользователя
+          content:
+            application/json:
+              schema:
+               $ref: '#/components/schemas/Users'
+        401:
+          description: Authentication credentials were not provided.
+        404:
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+  /payments/:
+    get:
+      tags:
+        - Покупки
+      description: |
+        Получить список покупок                                
+        
+        Права доступа: **Аутентифицированные пользователи.**
+      parameters:
+        - name: date
+          in: query
+          description: фильтрует по заданной дате
+          schema:
+            type: string
+            example: "2023-07-31"
+        - name: date_from
+          in: query
+          description: фильтрует от заданной даты
+          schema:
+            type: string
+            example: "2023-07-31"
+        - name: date_to
+          in: query
+          description: фильтрует до заданной даты
+          schema:
+            type: string
+            example: "2023-08-01"
+      responses:
+        200:
+          description: Список покупок
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: number
+                  next:
+                    type: string
+                  previous:
+                    type: string
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Payment'
+        400:
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        401:
+          description: Authentication credentials were not provided.
+  /payments/{payment_id}/:
+    get:
+      tags:
+        - Покупки
+      description: |
+        Получить покупку по ID                                
+        
+        Права доступа: **Аутентифицированные пользователи.**
+      responses:
+        200:
+          description: Покупка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        401:
+          description: Authentication credentials were not provided.
+        404:
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+
+components:
+  schemas:
+    JWTToken:
+      title: JWT Токен
+      type: object
+      properties:
+        access:
+          type: string
+          title: access токен
+        refresh:
+          type: string
+          title: refresh токен
+    Users:
+      title: Пользователи
+      type: object
+      description: Пользователь
+      properties:
+        id:
+          type: integer
+          example: 1
+          description: ID Пользователя
+          readOnly: true
+        username:
+          type: string
+          description: Username Пользователя
+          example: BethSmith
+          readOnly: true
+        first_name:
+          type: string
+          example: "Бэт"
+          description: Имя Пользователя
+          readOnly: true
+        last_name:
+          type: string
+          example: "Смит"
+          description: Фамилия Пользователя
+          readOnly: true
+        email:
+          type: string
+          description: Адрес электронной почты Пользователя
+        role:
+          type: string
+          example: "user"
+          description: Роль пользователя (admin, user)
+          readOnly: true
+    Payment:
+      title: Покупки
+      type: object
+      description: Список покупок
+      properties:
+        id:
+          type: integer
+          example: 1
+          description: ID Покупки
+          readOnly: true
+        user:
+          $ref: '#/components/schemas/Users'
+        product:
+          type: string
+          example: "Латте"
+          description: Название
+          readOnly: true
+        price:
+          type: integer
+          example: 220
+          description: Цена
+          readOnly: true
+        currency:
+          type: string
+          example: "RUB"
+          description: Валюта
+        pay_date:
+          type: string
+          example: "2023-07-31T10:57:00+03:00"
+          description: Время покупки
+          readOnly: true
+    ValidationError:
+      title: Ошибка валидации
+      type: object
+      properties:
+        field_name:
+          type: array
+          items:
+            type: string
+    NotFound:
+      description: Объект не найден
+      type: object
+      properties:
+        detail:
+          description: 'Описание ошибки'
+          example: 'Not found'
+          type: string
